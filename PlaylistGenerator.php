@@ -3,12 +3,12 @@
 /**
  * Class PlaylistGenerator
  * Порядок запросов
-   http://stb.lanta-net.ru/stb-client-4/seam/resource/rest/profiles?mac=макадрес
-   // ответ json - [{"id":11734,"isRoot":true,"name":"root"}]
-   http://stb.lanta-net.ru/stb-client-4/seam/resource/rest/profiles/set_profile?profile_id=ид_из_предыдущего&mac=макадрес
-   // ответ true
-   http://stb.lanta-net.ru/stb-client-4/seam/resource/rest/channels
-   // ответ json - список каналов
+http://stb.lanta-net.ru/stb-client-4/seam/resource/rest/profiles?mac=макадрес
+// ответ json - [{"id":11734,"isRoot":true,"name":"root"}]
+http://stb.lanta-net.ru/stb-client-4/seam/resource/rest/profiles/set_profile?profile_id=ид_из_предыдущего&mac=макадрес
+// ответ true
+http://stb.lanta-net.ru/stb-client-4/seam/resource/rest/channels
+// ответ json - список каналов
  */
 class PlaylistGenerator
 {
@@ -139,12 +139,14 @@ class PlaylistGenerator
         $playlistRows = [];
         $playlistRows[] = '#EXTM3U url-tvg="http://tv.lanta-net.ru/tvprogram.zip" tvg-shift="+3"';
         foreach($this->channelsData->all as $channel) {
+            if(!$channel->available)
+                continue;
             $archive = "";
             if (isset($channel->dvrStreamName)) {
                 $archive = 'catchup="default" catchup-source="http://193.203.61.11/'.$channel->dvrStreamName.'/index-${start}-3600.m3u8" catchup-days=3 ';
             }
             $playlistRows[] = '#EXTINF:-1 tvg-name="'.$channel->id.'" group_id="'.$channel->category_id.'" '.$archive.
-            'lanta_tv_id="'.$channel->id.'" tvg-logo="http://tv.lanta-net.ru/'.$channel->id.'.png",'.$channel->name;
+                'lanta_tv_id="'.$channel->id.'" tvg-logo="http://tv.lanta-net.ru/'.$channel->id.'.png",'.$channel->name;
             $playlistRows[] = $this->channelUrl($channel->mod, $channel->address, $channel->port);
         }
         return implode("\n", $playlistRows);
